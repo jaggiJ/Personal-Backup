@@ -20,4 +20,4 @@
 #      --list-only             list the files instead of copying them
 
 # rsync -vrbulnhz --append --files-from=included --progress --log-file=logB --list-only
-
+# test2
