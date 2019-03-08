@@ -2,22 +2,85 @@
 
 # Personal backup
 
+# Note: It is recommended that the backup drive has a Linux compatible file
+# system as ext4. You must exclude the destination directory, if it exists in
+# the local system. It will avoid the an infinite loop. A trailing slash on the
+# source changes this behavior to avoid creating an additional directory level
+# at the destination. You can think of a trailing / on a source as meaning "copy
+# the contents of this directory" as opposed to "copy the directory by name",
+# but in both cases the attributes of the containing directory are transferred
+# to the containing directory on the destination.
 
-#  -e "^ *-
+#  -a, --archive               archive mode; equals -rlptgoD (no -H,-A,-X)
 #  -v, --verbose               increase verbosity
 #  -r, --recursive             recurse into directories
-#  -b, --backup                make backups (see --suffix & --backup-dir)
-#  -u, --update                skip files that are newer on the receiver
-#      --append                append data onto shorter files
-#      --append-verify         like --append, but with old data in file checksum
 #  -l, --links                 copy symlinks as symlinks
 #  -n, --dry-run               perform a trial run with no changes made
-#  -z, --compress              compress file data during the transfer
 #      --files-from=FILE       read list of source-file names from FILE
 #  -h, --human-readable        output numbers in a human-readable format
 #      --progress              show progress during transfer
 #      --log-file=FILE         log what we're doing to the specified FILE
 #      --list-only             list the files instead of copying them
+#  -p, --perms                 preserve permissions
+#  -g, --group                 preserve group
+#  -t, --times                 preserve modification times
+#  -o, --owner                 preserve owner (super-user only)
+#  -D                          same as --devices --specials
+#      --devices               preserve device files (super-user only)
+#      --specials              preserve special files
+#  -A – preserve Access Control List. (e.g. 744)
+#  -X – preserve extended attributes. (file metadata assigned by user or apps)
+#  -v – It will show the progress of the backup.
+#  --delete – delete all the files in the backup not present on your system.
+#  --dry-run – This option simulates the backup. Useful to test. 
+#  --exclude – Excludes folders and files from backup.
+#  --include=PATTERN       don't exclude files matching PATTERN
+#  --include-from=FILE     read include patterns from FILE
 
-# rsync -vrbulnhz --append --files-from=included --progress --log-file=logB --list-only
+# tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
+# <filename>$(date +%d%b%Y)  - add date at file creation to end of filename
+
+# This example is for system backup '/'
+#sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
+     #--exclude=/sys/* --exclude=/tmp/* --exclude=/run/* --exclude=/mnt/* \
+     #--exclude=/media/* --exclude="swapfile" --exclude="lost+found" \
+     #--exclude=".cache" --exclude="Downloads" --exclude=".VirtualBoxVMs"\
+     #--exclude=".ecryptfs" / /backup_directory/
+
+# This example is for HOME backup '/home/'
+rsync -xaAXhv --progress --dry-run --list-only \
+      --log-file="log`date +%d%b%Y`time`date +%H%M`" \
+      --include-from=included --exclude-from=excluded \
+      /home/ /home/jaggij/Backup
+
 # test2
+
+# Tar credentials
+# DATE=`date +%d-%b-%Y`                  # This Command will add date in Backup File Name.
+# FILENAME=fullbackup-$DATE.tar.gz       # Here I define Backup file name format.
+# SRCDIR=/                               # Location of Important Data Directory (Source of backup).
+# DESDIR=/example/please/change        # Destination of backup file.
+# tar -cpzf $DESDIR/$FILENAME --directory=/ --exclude=proc --exclude=sys --exclude=dev/pts --exclude=$DESDIR $SRCDIR
+
+# Firsr for backup-tar.sh
+# $ sudo crontab -e
+#
+# Add line:
+# 00 08 * * 7 /bin/bash /path/to/backup-tar.sh
+# This will run the backup-tar.sh script every sunday at 08:00.
+#
+# Then for backup-rsync.sh
+# $ crontab -e
+#
+# Add line:
+# 00 23 * * 7 /bin/bash /home/tuukka/backup-rsync.sh
+
+#Purpose = Sync backup files to an another server
+#Created on 05-05-2015
+#Author = Tuukka Merilainen
+#Version 1.0
+#START
+
+# rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup
+
+#END

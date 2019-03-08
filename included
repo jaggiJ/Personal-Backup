@@ -1,0 +1,18 @@
+##"Assumes source file to be /home/"
+#
+#Inclusions and exclusions:
+#Excluding files by name or by location is easy: --exclude=*~, --exclude=/some/relative/location (relative to the source argument, e.g. this excludes ~/LaTeX/some/relative/location).
+#If you only want to match a few files or locations, include them, include every directory leading to them (for example with --include=*/), then exclude the rest with --exclude='*'. This is because:
+#If you exclude a directory, this excludes everything below it. The excluded files won't be considered at all.
+## If you include a directory, this doesn't automatically include its contents. In recent versions, --include='directory/***' will do that.
+## For each file, the first matching rule applies (and anything never matched is included).
+## Patterns:
+## If a pattern doesn't contain a /, it applies to the file name sans directory.
+## If a pattern ends with /, it applies to directories only.
+## If a pattern starts with /, it applies to the whole path from the directory that was passed as an argument to rsync.
+## * any substring of a single directory component (i.e. never matches /); ** matches any path substring.
+## 
+## If a source argument ends with a /, its contents are copied (rsync -r a/ b creates b/foo for every a/foo). Otherwise the directory itself is copied (rsync -r a b creates b/a).
+#
+"*/"
+/jaggij/Downloads/Video/***
