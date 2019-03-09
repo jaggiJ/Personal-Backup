@@ -37,9 +37,6 @@
 #  --include=PATTERN       don't exclude files matching PATTERN
 #  --include-from=FILE     read include patterns from FILE
 
-# tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
-# <filename>$(date +%d%b%Y)  - add date at file creation to end of filename
-
 # This example is for system backup '/'
 #sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
      #--exclude=/sys/* --exclude=/tmp/* --exclude=/run/* --exclude=/mnt/* \
@@ -48,39 +45,14 @@
      #--exclude=".ecryptfs" / /backup_directory/
 
 # This example is for HOME backup '/home/'
-rsync -xaAXhv --dry-run --delete-excluded \
-      --log-file="log`date +%d%b%Y`time`date +%H%M`" \
+# rsync -xaAXhv --dry-run --delete-excluded \
+      # --log-file="log`date +%d%b%Y`time`date +%H%M`" \
+      # --include-from=included --exclude-from=excluded \
+      # /home/ /home/jaggij/Backup
+
+# This is example of `home backup restore`. Note --delete here is without -excluded
+# to prevent unwanted deletions.
+rsync -xaAXhv --dry-run --delete \
+      --log-file="log`date +%d%b%Y`time`date +%H%M`" --exclude="lost+found" \
       --include-from=included --exclude-from=excluded \
-      /home/ /home/jaggij/Backup
-
-# test2
-
-# Tar credentials
-# DATE=`date +%d-%b-%Y`                  # This Command will add date in Backup File Name.
-# FILENAME=fullbackup-$DATE.tar.gz       # Here I define Backup file name format.
-# SRCDIR=/                               # Location of Important Data Directory (Source of backup).
-# DESDIR=/example/please/change        # Destination of backup file.
-# tar -cpzf $DESDIR/$FILENAME --directory=/ --exclude=proc --exclude=sys --exclude=dev/pts --exclude=$DESDIR $SRCDIR
-
-# Firsr for backup-tar.sh
-# $ sudo crontab -e
-#
-# Add line:
-# 00 08 * * 7 /bin/bash /path/to/backup-tar.sh
-# This will run the backup-tar.sh script every sunday at 08:00.
-#
-# Then for backup-rsync.sh
-# $ crontab -e
-#
-# Add line:
-# 00 23 * * 7 /bin/bash /home/tuukka/backup-rsync.sh
-
-#Purpose = Sync backup files to an another server
-#Created on 05-05-2015
-#Author = Tuukka Merilainen
-#Version 1.0
-#START
-
-# rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup
-
-#END
+      ~/Backup/ /home

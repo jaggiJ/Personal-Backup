@@ -14,5 +14,5 @@
 ## 
 ## If a source argument ends with a /, its contents are copied (rsync -r a/ b creates b/foo for every a/foo). Otherwise the directory itself is copied (rsync -r a b creates b/a).
 #
-"*/"
-/jaggij/Downloads/Video/***
+/jaggij/Downloads/
+/jaggij/Downloads/Video/
