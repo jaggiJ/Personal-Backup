@@ -1,6 +1,39 @@
 #!/bin/bash
 
 # Personal backup
+# This example is for HOME backup '/home/'
+# USAGE
+# ./backup.sh type dryrun time
+# ./backup.sh               - dryrun of daily home backup
+# ./backup.sh -d nodry      - daily backup
+# ./backup.sh -w nodry      - weekly backup
+
+# VARIABLES TO SETUP BY USER
+
+backup_daily=/home/jaggij/Backup  # default backup path
+backup_weekly=/media/backups/weekly/home
+bsource=/home/
+
+bdestination="$backup_daily"
+
+# MAIN PROGRAM
+
+[[ $1 == "-w" ]] && bdestination="$backup_weekly"
+echo backup_path is "$bdestination" | tee -a lastbackup.log
+
+if [[ $2 == nodry ]] ; then
+    rsync -xaAXhv --delete-excluded \
+          --log-file="log`date +%d%b%Y`time`date +%H%M`" \
+          --include-from=./included \
+          --exclude-from=./excluded \
+          "$bsource" "$bdestination"
+else
+    rsync -xaAXhv --dry-run --delete-excluded \
+          --log-file="log`date +%d%b%Y`time`date +%H%M`" \
+          --include-from=./included \
+          --exclude-from=./excluded \
+          "$bsource" "$bdestination"
+fi
 
 # Note: It is recommended that the backup drive has a Linux compatible file
 # system as ext4. You must exclude the destination directory, if it exists in
@@ -38,7 +71,7 @@
 #  --include-from=FILE     read include patterns from FILE
 
 # tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
-# <filename>$(date +%d%b%Y)  - add date at file creation to end of filename
+# <filename>$(date +%d%b%Y`time`date +%H%M) - add date at file creation to end of filename
 
 # This example is for system backup '/'
 #sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
@@ -46,13 +79,6 @@
      #--exclude=/media/* --exclude="swapfile" --exclude="lost+found" \
      #--exclude=".cache" --exclude="Downloads" --exclude=".VirtualBoxVMs"\
      #--exclude=".ecryptfs" / /backup_directory/
-
-# This example is for HOME backup '/home/'
-rsync -xaAXhv --dry-run --delete-excluded \
-      --log-file="log`date +%d%b%Y`time`date +%H%M`" \
-      --include-from=included --exclude-from=excluded \
-      /home/ /home/jaggij/Backup
-
 # test2
 
 # Tar credentials
@@ -76,9 +102,6 @@ rsync -xaAXhv --dry-run --delete-excluded \
 # 00 23 * * 7 /bin/bash /home/tuukka/backup-rsync.sh
 
 #Purpose = Sync backup files to an another server
-#Created on 05-05-2015
-#Author = Tuukka Merilainen
-#Version 1.0
 #START
 
 # rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup

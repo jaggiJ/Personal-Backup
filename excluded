@@ -18,4 +18,5 @@
 /jaggij/.emacs.d/.cache/*
 ".ecryptfs"
 ".VirtualBoxVms"
-"lost+found"
+/lost+found/
+
