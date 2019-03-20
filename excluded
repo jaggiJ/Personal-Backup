@@ -9,7 +9,8 @@
 # recursively from the top down; it behaves as if each path component gets a
 # turn at being the end of the filename.
 
-/jaggij/Backup/*
+/jaggij/Backup/
+/jaggij/sysbackup/
 /jaggij/Downloads/*
 /jaggij/Videos/*
 /jaggij/Music/*
@@ -19,4 +20,5 @@
 ".ecryptfs"
 ".VirtualBoxVms"
 /lost+found/
-
+/google/
+Cataclysm-DDA/*
