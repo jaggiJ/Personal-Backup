@@ -5,6 +5,6 @@
 #/mnt/
 #/run/
 #/dev/
-/home/*
+#/home/
 tmp/*
 

@@ -36,7 +36,7 @@ echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
 # main command that writes changes
 if [[ $2 == nodry ]] ; then
     rsync -xaAXhv --delete-excluded \
-          --log-file="logsys `date +%d%b%Y`time`date +%H%M`" \
+          --log-file="logsys_`date +%d%b%Y`time`date +%H%M`" \
           --include-from=./includedsys \
           --exclude-from=./excludedsys \
           "$bsource" "$bdestination"
@@ -44,7 +44,7 @@ if [[ $2 == nodry ]] ; then
 # main command simulation only (dryrun)
 else
     rsync -xaAXhv --dry-run --delete-excluded \
-          --log-file="logsys `date +%d%b%Y`time`date +%H%M`" \
+          --log-file="logsys_`date +%d%b%Y`time`date +%H%M`" \
           --include-from=./includedsys \
           --exclude-from=./excludedsys \
           "$bsource" "$bdestination"

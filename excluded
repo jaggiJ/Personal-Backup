@@ -32,7 +32,7 @@
 /jaggij/.protonvpn-cli/
 /jaggij/sysbackup/
 "lastbackupsys.log"
-"logsys:*"
+"logsys_*"
 
 # OTHERS
 ".ecryptfs"
