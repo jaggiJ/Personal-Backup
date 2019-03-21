@@ -9,16 +9,33 @@
 # recursively from the top down; it behaves as if each path component gets a
 # turn at being the end of the filename.
 
+# EXCLUSION LIST BLOCK
+
+# backup directory
 /jaggij/Backup/
-/jaggij/sysbackup/
-/jaggij/Downloads/*
-/jaggij/Videos/*
-/jaggij/Music/*
+
+# CACHE
 /jaggij/.ccache/*
 /jaggij/.cache/*
 /jaggij/.emacs.d/.cache/*
-".ecryptfs"
-".VirtualBoxVms"
+
+# RECOVERABLE FROM OTHER SOURCE (trimming backup size)
+/jaggij/Downloads/*
+/jaggij/Videos/*
+/jaggij/Music/*
+/jaggij/Apps/Cataclysm-DDA/*
+/jaggij/.cataclysm-dda/*
+
+# ROOT AND OTHER USERS
 /lost+found/
 /google/
-Cataclysm-DDA/*
+/jaggij/.protonvpn-cli/
+/jaggij/sysbackup/
+"lastbackupsys.log"
+"logsys:*"
+
+# OTHERS
+".ecryptfs"
+".VirtualBoxVms"
+
+# END OF EXCLUSION LIST BLOCK

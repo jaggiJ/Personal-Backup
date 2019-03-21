@@ -19,7 +19,8 @@ bdestination="$backup_daily"
 # MAIN PROGRAM
 
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
-echo backup_path is "$bdestination" | tee -a lastbackup.log
+echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
+    | tee -a lastbackup.log
 
 if [[ $2 == nodry ]] ; then
     rsync -xaAXhv --delete-excluded \

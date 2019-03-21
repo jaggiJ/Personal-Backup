@@ -1,36 +1,58 @@
 #!/bin/bash
 
-# Personal backup
-# This example is for system backup / (root)
-# USAGE
-# ./sysbackup.sh type dryrun time
-# ./sysbackup.sh               - dryrun of daily system backup
-# ./sysbackup.sh -d nodry      - daily backup
-# ./sysbackup.sh -w nodry      - weekly backup
+# define user help functionality './sysbackup --help'
+help()
+{
+    cat <<EOF
+Personal backup
+This example is for system backup / (root)
+USAGE
+./sysbackup.sh               - dryrun of daily system backup (default)
+./sysbackup.sh -d nodry      - daily backup
+./sysbackup.sh -w nodry      - weekly backup
+EOF
+}
 
 # VARIABLES TO SETUP BY USER
 
+# where to store daily /home backups ?
 backup_daily=/home/jaggij/sysbackup
+# where to store weekly /home backups ?
 backup_weekly=/media/backups/weekly/system
+# what need to be backed up ?
 bsource=/
 
 # MAIN PROGRAM
 
+# check for help function
+[[ $1 == --help || $1 == -h ]] && help && exit 1
+
+# determine daily or weekly backup type
 bdestination="$backup_daily"
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
-echo backup_path is "$bdestination" | tee -a lastbackup.log
+echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
+    | tee -a lastbackupsys.log
 
+# main command that writes changes
 if [[ $2 == nodry ]] ; then
     rsync -xaAXhv --delete-excluded \
-          --log-file="logsys`date +%d%b%Y`time`date +%H%M`" \
-          --exclude-from=./excludesys \
+          --log-file="logsys `date +%d%b%Y`time`date +%H%M`" \
+          --include-from=./includedsys \
+          --exclude-from=./excludedsys \
           "$bsource" "$bdestination"
+
+# main command simulation only (dryrun)
 else
     rsync -xaAXhv --dry-run --delete-excluded \
-          --log-file="logsys:`date +%d%b%Y`time`date +%H%M`" \
-          --exclude-from=./excludesys \
+          --log-file="logsys `date +%d%b%Y`time`date +%H%M`" \
+          --include-from=./includedsys \
+          --exclude-from=./excludedsys \
           "$bsource" "$bdestination"
 fi
+
+# END OF PROGRAM
+
+# ADDITIONAL NOTES
 
 # Note: It is recommended that the backup drive has a Linux compatible file
 # system as ext4. You must exclude the destination directory, if it exists in
@@ -103,4 +125,5 @@ fi
 
 # rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup
 
-#END
+# END OF ADDITIONAL NOTES
+
