@@ -1,0 +1,10 @@
+# Hashed are already excluded by being on different filesystem (-a)
+#/proc/ 
+#/sys/    
+#/media/  
+#/mnt/
+#/run/
+#/dev/
+/home/*
+tmp/*
+
