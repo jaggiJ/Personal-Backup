@@ -1,12 +1,29 @@
 #!/bin/bash
 
-# Personal backup
-# This example is for HOME backup '/home/'
-# USAGE
-# ./backup.sh type dryrun time
-# ./backup.sh               - dryrun of daily home backup
-# ./backup.sh -d nodry      - daily backup
-# ./backup.sh -w nodry      - weekly backup
+# PERSONAL BACKUP - USER HOME FILES (AS USER)
+# HELP: '$bash backup.sh --help'
+
+# user help functionality './backup --help'
+function help {
+   cat <<EOF
+
+Personal Backup
+This example is for HOME backup '/home/'
+
+USAGE
+
+./backup.sh type dryrun time
+./backup.sh               - dryrun of daily home backup
+./backup.sh -d nodry      - daily backup
+./backup.sh -w nodry      - weekly backup
+
+CURRENT PATHES (edit backup.sh to change them):
+
+EOF
+    echo daily backup stored in":$backup_daily"
+    echo weekly backup stored in":$backup_weekly"
+    echo directory to backup":$bsource"
+}
 
 # VARIABLES TO SETUP BY USER
 
@@ -18,6 +35,10 @@ bdestination="$backup_daily"
 
 # MAIN PROGRAM
 
+# check for help function
+[[ $1 == --help || $1 == -h ]] && help && exit 0
+
+# determine daily or weekly backup type
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
 echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
     | tee -a lastbackup.log
@@ -35,6 +56,8 @@ else
           --exclude-from=./excluded \
           "$bsource" "$bdestination"
 fi
+
+# END OF MAIN PROGRAM
 
 # Note: It is recommended that the backup drive has a Linux compatible file
 # system as ext4. You must exclude the destination directory, if it exists in
@@ -74,33 +97,13 @@ fi
 # tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
 # <filename>$(date +%d%b%Y`time`date +%H%M) - add date at file creation to end of filename
 
-# This example is for system backup '/'
-#sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
-     #--exclude=/sys/* --exclude=/tmp/* --exclude=/run/* --exclude=/mnt/* \
-     #--exclude=/media/* --exclude="swapfile" --exclude="lost+found" \
-     #--exclude=".cache" --exclude="Downloads" --exclude=".VirtualBoxVMs"\
-     #--exclude=".ecryptfs" / /backup_directory/
-# test2
-
 # Tar credentials
 # DATE=`date +%d-%b-%Y`                  # This Command will add date in Backup File Name.
 # FILENAME=fullbackup-$DATE.tar.gz       # Here I define Backup file name format.
 # SRCDIR=/                               # Location of Important Data Directory (Source of backup).
 # DESDIR=/example/please/change        # Destination of backup file.
 # tar -cpzf $DESDIR/$FILENAME --directory=/ --exclude=proc --exclude=sys --exclude=dev/pts --exclude=$DESDIR $SRCDIR
-
-# Firsr for backup-tar.sh
-# $ sudo crontab -e
-#
-# Add line:
-# 00 08 * * 7 /bin/bash /path/to/backup-tar.sh
-# This will run the backup-tar.sh script every sunday at 08:00.
-#
-# Then for backup-rsync.sh
-# $ crontab -e
-#
-# Add line:
-# 00 23 * * 7 /bin/bash /home/tuukka/backup-rsync.sh
+# tar -cpzf backup`date +%d-%b-%Y`.tar.gz home/ system/
 
 #Purpose = Sync backup files to an another server
 #START

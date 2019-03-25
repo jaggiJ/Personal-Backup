@@ -1,16 +1,29 @@
 #!/bin/bash
 
-# define user help functionality './sysbackup --help'
-help()
-{
+# PERSONAL BACKUP - SYSTEM FILES (AS ROOT)
+# HELP: '$bash sysbackup.sh --help'
+
+# user help functionality './sysbackup --help'
+function help {
     cat <<EOF
+
 Personal backup
 This example is for system backup / (root)
+
 USAGE
+
 ./sysbackup.sh               - dryrun of daily system backup (default)
 ./sysbackup.sh -d nodry      - daily backup
 ./sysbackup.sh -w nodry      - weekly backup
+./sysbackup.sh -tar          - monthly backup
+
+CURRENT PATHES (edit backup.sh to change them):
+
 EOF
+    echo daily backup stored in":$backup_daily"
+    echo weekly backup stored in":$backup_weekly"
+    echo monthly backup stored in":$backup_monthly"
+    echo directory to backup":$bsource"
 }
 
 # VARIABLES TO SETUP BY USER
@@ -19,19 +32,29 @@ EOF
 backup_daily=/home/jaggij/sysbackup
 # where to store weekly /home backups ?
 backup_weekly=/media/backups/weekly/system
+# where to store monthly home and sys backup ?
+backup_monthly=/media/backups/weekly
 # what need to be backed up ?
 bsource=/
 
 # MAIN PROGRAM
 
 # check for help function
-[[ $1 == --help || $1 == -h ]] && help && exit 1
+[[ $1 == --help || $1 == -h ]] && help && exit 0
+
+# check and run monthly backup, then quit
+[[ $1 == "-tar" ]] && cd $backup_monthly \
+    && tar -cpzvf "backup`date +%d-%b-%Y`.tar.gz" home/ system/ \
+    && echo Monthly backup started and stored at "$backup_monthly" && exit 0
+
+# terminate program with error 2 if previous instruction go wrong
+[[ $1 == "-tar" ]] && exit 2
 
 # determine daily or weekly backup type
 bdestination="$backup_daily"
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
 echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
-    | tee -a lastbackupsys.log
+    |tee -a lastbackupsys.log
 
 # main command that writes changes
 if [[ $2 == nodry ]] ; then
@@ -50,7 +73,7 @@ else
           "$bsource" "$bdestination"
 fi
 
-# END OF PROGRAM
+# END OF MAIN PROGRAM
 
 # ADDITIONAL NOTES
 
