@@ -59,6 +59,8 @@ fi
 
 # END OF MAIN PROGRAM
 
+# ADDITIONAL NOTES
+
 # Note: It is recommended that the backup drive has a Linux compatible file
 # system as ext4. You must exclude the destination directory, if it exists in
 # the local system. It will avoid the an infinite loop. A trailing slash on the
@@ -94,20 +96,6 @@ fi
 #  --include=PATTERN       don't exclude files matching PATTERN
 #  --include-from=FILE     read include patterns from FILE
 
-# tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
-# <filename>$(date +%d%b%Y`time`date +%H%M) - add date at file creation to end of filename
+# END OF ADDITIONAL NOTES
 
-# Tar credentials
-# DATE=`date +%d-%b-%Y`                  # This Command will add date in Backup File Name.
-# FILENAME=fullbackup-$DATE.tar.gz       # Here I define Backup file name format.
-# SRCDIR=/                               # Location of Important Data Directory (Source of backup).
-# DESDIR=/example/please/change        # Destination of backup file.
-# tar -cpzf $DESDIR/$FILENAME --directory=/ --exclude=proc --exclude=sys --exclude=dev/pts --exclude=$DESDIR $SRCDIR
-# tar -cpzf backup`date +%d-%b-%Y`.tar.gz home/ system/
-
-#Purpose = Sync backup files to an another server
-#START
-
-# rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup
-
-#END
+# THE END

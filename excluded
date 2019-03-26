@@ -38,5 +38,6 @@
 ".ecryptfs"
 ".VirtualBoxVms"
 /jaggij/verateddy
+/jaggij/.local/share/Trash
 
 # END OF EXCLUSION LIST BLOCK

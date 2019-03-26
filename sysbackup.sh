@@ -15,9 +15,9 @@ USAGE
 ./sysbackup.sh               - dryrun of daily system backup (default)
 ./sysbackup.sh -d nodry      - daily backup
 ./sysbackup.sh -w nodry      - weekly backup
-./sysbackup.sh -tar          - monthly backup
+./sysbackup.sh -tar          - monthly incremental backup (nodry)
 
-CURRENT PATHES (edit backup.sh to change them):
+CURRENT PATHES (edit sysbackup.sh to change them):
 
 EOF
     echo daily backup stored in":$backup_daily"
@@ -42,10 +42,24 @@ bsource=/
 # check for help function
 [[ $1 == --help || $1 == -h ]] && help && exit 0
 
-# check and run monthly backup, then quit
-[[ $1 == "-tar" ]] && cd $backup_monthly \
-    && tar -cpzvf "backup`date +%d-%b-%Y`.tar.gz" home/ system/ \
-    && echo Monthly backup started and stored at "$backup_monthly" && exit 0
+# run monthly backup code
+if [[ $1 == "-tar" ]]; then
+
+    # go into monthly backup directory
+    cd $backup_monthly
+
+    # run full backup 0-level if not already present
+    if [ ! -f backup0*.tar.gz ]; then
+        tar --listed-incremental=snapshot.file \
+            -cpzvf "backup0_`date +%d-%b-%Y`.tar.gz" home/ system/ \
+            && echo Monthly backup started and stored at "$backup_monthly" \
+            && exit 0
+    else  # run 1-level incremental backup
+        cp snapshot.file snapshot.file1 && echo snapshot file copied
+        tar --listed-incremental=snapshot.file1 -cvzf \
+            backup1_`date +%d-%b-%Y`time`date +%H%M`.tar.gz home/ system/
+    fi
+fi
 
 # terminate program with error 2 if previous instruction go wrong
 [[ $1 == "-tar" ]] && exit 2
@@ -76,6 +90,32 @@ fi
 # END OF MAIN PROGRAM
 
 # ADDITIONAL NOTES
+
+# TAR options
+
+# tar -c - create new archive
+#     -v - verbose
+#     -t - list files in archive
+#     -z - filter through gzip
+#     -p - preserve permissions
+#     -f - use archive file
+
+# backup name with current date and time
+# foo`date +%d%b%Y`time`date +%H%M`
+
+# CREATION OF INCREMENTAL TAR ARCHIEVE
+
+# 0-level full backup command
+# tar --listed-incremental=snapshot.file -cvzf backup.tar.gz /path/to/dir
+
+# 1-level backup command
+# tar --listed-incremental=snapshot.file -cvzf backup.1.tar.gz /path/to/dir
+
+# if we want to make more “level-1” backups we can copy the snapshot file and
+# then provide it to tar. If we don’t need that then we need to do nothing it
+# will simply created another incremented archive.
+# cp snapshot.file snapshot.file.1
+# tar --listed-incremental=snapshot.file.1 -cvzf backup.1.tar.gz /path/to/dir
 
 # Note: It is recommended that the backup drive has a Linux compatible file
 # system as ext4. You must exclude the destination directory, if it exists in
@@ -112,41 +152,6 @@ fi
 #  --include=PATTERN       don't exclude files matching PATTERN
 #  --include-from=FILE     read include patterns from FILE
 
-# tar -c - create new archive -z filter through gzip -p preserve permissions -f use archive file
-# <filename>$(date +%d%b%Y`time`date +%H%M) - add date at file creation to end of filename
-
-# This example is for system backup '/'
-#sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
-     #--exclude=/sys/* --exclude=/tmp/* --exclude=/run/* --exclude=/mnt/* \
-     #--exclude=/media/* --exclude="swapfile" --exclude="lost+found" \
-     #--exclude=".cache" --exclude="Downloads" --exclude=".VirtualBoxVMs"\
-     #--exclude=".ecryptfs" / /backup_directory/
-# test2
-
-# Tar credentials
-# DATE=`date +%d-%b-%Y`                  # This Command will add date in Backup File Name.
-# FILENAME=fullbackup-$DATE.tar.gz       # Here I define Backup file name format.
-# SRCDIR=/                               # Location of Important Data Directory (Source of backup).
-# DESDIR=/example/please/change        # Destination of backup file.
-# tar -cpzf $DESDIR/$FILENAME --directory=/ --exclude=proc --exclude=sys --exclude=dev/pts --exclude=$DESDIR $SRCDIR
-
-# Firsr for backup-tar.sh
-# $ sudo crontab -e
-#
-# Add line:
-# 00 08 * * 7 /bin/bash /path/to/backup-tar.sh
-# This will run the backup-tar.sh script every sunday at 08:00.
-#
-# Then for backup-rsync.sh
-# $ crontab -e
-#
-# Add line:
-# 00 23 * * 7 /bin/bash /home/tuukka/backup-rsync.sh
-
-#Purpose = Sync backup files to an another server
-#START
-
-# rsync -a --bwlimit=5000 -e ssh --hard-links --inplace sourcefolder destinationuser@example.com:/full-backup
-
 # END OF ADDITIONAL NOTES
 
+# THE END

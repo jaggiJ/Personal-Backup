@@ -2,14 +2,52 @@
 
 # Personal backup
 
-# Note: It is recommended that the backup drive has a Linux compatible file
-# system as ext4. You must exclude the destination directory, if it exists in
-# the local system. It will avoid the an infinite loop. A trailing slash on the
-# source changes this behavior to avoid creating an additional directory level
-# at the destination. You can think of a trailing / on a source as meaning "copy
-# the contents of this directory" as opposed to "copy the directory by name",
-# but in both cases the attributes of the containing directory are transferred
-# to the containing directory on the destination.
+# USER HELP FUNCTION
+
+function help {
+   cat <<EOF
+
+USAGE EXAMPLES
+
+./restore.sh /home/jaggij/Backup/Video /home/jaggij/Video - source to dest dry
+./restore.sh /media/backups/system/var /var nodry - restores directory into path
+
+EOF
+}
+
+[[ $1 == "--help" || $1 == "-h" || $1 == "" ]] && help && exit 0
+
+# This is example of `home backup restore`. Note --delete here is without -excluded
+# to prevent unwanted deletions.
+# rsync -xaAXhv --dry-run --delete \
+      # --log-file="log`date +%d%b%Y`time`date +%H%M`" --exclude="lost+found" \
+      # --include-from=included --exclude-from=excluded \
+      # ~/Backup/ /home
+
+# ADDITIONAL NOTES
+
+# RESTORE INCREMENTAL TAR BACKUP
+
+# When extracting from the incremental backup tar
+# attempts to restore the exact state the file system had when the archive was
+# created. In particular, it will delete those files in the file system that did
+# not exist in their directories when the archive was created.
+# if we had created several levels of incremental files, then in order to
+# restore the exact contents the file system had when the last level was
+# created, we will need to restore from all backups in turn. At first, do
+# level-0 extraction:
+# tar --listed-incremental=/dev/null -xzpvf backup.tar.gz
+# and then, level-1 extraction:
+# tar --listed-incremental=/dev/null -xzpvf backup.1.tar.gz
+
+# PEEK into incremental backup file
+
+# If you want to see what is really in the incremental tar (archive managers wont
+# show you the stuff its going to delete for you), you can use the --incremental
+# and two verbose flags thus:
+# ~/wk/tar $ tar --incremental -tvvzpf root_backup_incremental.tar.gz
+
+# RSYNC options
 
 #  -a, --archive               archive mode; equals -rlptgoD (no -H,-A,-X)
 #  -v, --verbose               increase verbosity
@@ -37,22 +75,6 @@
 #  --include=PATTERN       don't exclude files matching PATTERN
 #  --include-from=FILE     read include patterns from FILE
 
-# This example is for system backup '/'
-#sudo rsync -xaAXv --delete --dry-run --log-file=logB --exclude=/dev/* --exclude=/proc/* \
-     #--exclude=/sys/* --exclude=/tmp/* --exclude=/run/* --exclude=/mnt/* \
-     #--exclude=/media/* --exclude="swapfile" --exclude="lost+found" \
-     #--exclude=".cache" --exclude="Downloads" --exclude=".VirtualBoxVMs"\
-     #--exclude=".ecryptfs" / /backup_directory/
+# END OF ADDITIONAL NOTES
 
-# This example is for HOME backup '/home/'
-# rsync -xaAXhv --dry-run --delete-excluded \
-      # --log-file="log`date +%d%b%Y`time`date +%H%M`" \
-      # --include-from=included --exclude-from=excluded \
-      # /home/ /home/jaggij/Backup
-
-# This is example of `home backup restore`. Note --delete here is without -excluded
-# to prevent unwanted deletions.
-rsync -xaAXhv --dry-run --delete \
-      --log-file="log`date +%d%b%Y`time`date +%H%M`" --exclude="lost+found" \
-      --include-from=included --exclude-from=excluded \
-      ~/Backup/ /home
+# THE END
