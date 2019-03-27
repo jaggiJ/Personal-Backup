@@ -8,9 +8,11 @@ This example is for system with home directory on separate partition
 than system (root /) directory. Scripts are assumed to be located at  
 `/home/jaggij/Git/Personal-Backup/`  
 
-HOW TO MAKE THIS ALL THIS SCRIPTS INTO AUTOMATED BACKUPS ?  
+HOW TO USE CRONTAB TO AUTOMATE BACKUPS ?  
 
-1. Order cron to backup system and home files every day, every week, and every month (3 separate backups)   
+Order cron to backup system files and home (personal) files every day, every week,  
+and every month (3 separate backup destinations).  
+
 type `crontab -e` and put lines below into crontab file that comes, then save&quit type `:wq`  
 ```  
 # DAILY BACKUP  
