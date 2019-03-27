@@ -1,24 +1,35 @@
 #!/bin/bash
 
-# Personal backup
+# TODO:
+# 1. commands for single directory restore, dryrun and normal
+# 2. commands for full restore of system and home backups dry and normal.
+
+# PERSONAL BACKUP - RESTORE OPTIONS
+# MIT License
+# Copyright (c) 2019 jaggiJ
+
+# USAGE: ./restore.sh --help
 
 # USER HELP FUNCTION
-
 function help {
    cat <<EOF
 
 USAGE EXAMPLES
 
-./restore.sh /home/jaggij/Backup/Video /home/jaggij/Video - source to dest dry
-./restore.sh /media/backups/system/var /var nodry - restores directory into path
+TO RESTORE SINGLE DIRECTORY FROM BACKUP (source) TO CURRENT HOME OR SYSTEM
+
+./restore.sh /home/jaggij/Backup/Video /home/jaggij/Video
+             source                    destination          
+sudo ./restore.sh /media/backups/system/var /var
+                  source                    destination          
 
 EOF
 }
 
-[[ $1 == "--help" || $1 == "-h" || $1 == "" ]] && help && exit 0
+[[ $1 == "--help" || $1 == "-h" || $# == 0 ]] && help && exit 0
 
-# This is example of `home backup restore`. Note --delete here is without -excluded
-# to prevent unwanted deletions.
+# This is example of `home backup restore`. Note --delete here is
+# without -excluded to prevent ... disaster :D
 # rsync -xaAXhv --dry-run --delete \
       # --log-file="log`date +%d%b%Y`time`date +%H%M`" --exclude="lost+found" \
       # --include-from=included --exclude-from=excluded \
@@ -45,7 +56,7 @@ EOF
 # If you want to see what is really in the incremental tar (archive managers wont
 # show you the stuff its going to delete for you), you can use the --incremental
 # and two verbose flags thus:
-# ~/wk/tar $ tar --incremental -tvvzpf root_backup_incremental.tar.gz
+# $ tar --incremental -tvvzpf root_backup_incremental.tar.gz
 
 # RSYNC options
 

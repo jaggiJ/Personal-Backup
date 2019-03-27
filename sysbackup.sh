@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # PERSONAL BACKUP - SYSTEM FILES (AS ROOT)
-# HELP: '$bash sysbackup.sh --help'
+# MIT License
+# Copyright (c) 2019 jaggiJ
+
+# USAGE: /.sysbackup.sh --help
 
 # user help functionality './sysbackup --help'
 function help {
@@ -17,7 +20,7 @@ USAGE
 ./sysbackup.sh -w nodry      - weekly backup
 ./sysbackup.sh -tar          - monthly incremental backup (nodry)
 
-CURRENT PATHES (edit sysbackup.sh to change them):
+CURRENT PATHS (edit sysbackup.sh to change them):
 
 EOF
     echo daily backup stored in":$backup_daily"
@@ -46,23 +49,22 @@ bsource=/
 if [[ $1 == "-tar" ]]; then
 
     # go into monthly backup directory
-    cd $backup_monthly
+    cd $backup_monthly || exit 3
 
     # run full backup 0-level if not already present
     if [ ! -f backup0*.tar.gz ]; then
         tar --listed-incremental=snapshot.file \
             -cpzvf "backup0_`date +%d-%b-%Y`.tar.gz" home/ system/ \
-            && echo Monthly backup started and stored at "$backup_monthly" \
-            && exit 0
+            && echo Monthly backup started and stored at "$backup_monthly"
+
     else  # run 1-level incremental backup
         cp snapshot.file snapshot.file1 && echo snapshot file copied
-        tar --listed-incremental=snapshot.file1 -cvzf \
-            backup1_`date +%d-%b-%Y`time`date +%H%M`.tar.gz home/ system/
+        tar --listed-incremental=snapshot.file1 -cpzvf \
+            backup1_"`date +%d-%b-%Y`time`date +%H%M`".tar.gz home/ system/ \
+            2>&1 | tee log"$(date +%d%H%M)"
     fi
+    exit 0
 fi
-
-# terminate program with error 2 if previous instruction go wrong
-[[ $1 == "-tar" ]] && exit 2
 
 # determine daily or weekly backup type
 bdestination="$backup_daily"

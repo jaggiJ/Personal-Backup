@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # PERSONAL BACKUP - USER HOME FILES (AS USER)
+# MIT License
+# Copyright (c) 2019 jaggiJ
+
 # HELP: '$bash backup.sh --help'
 
 # user help functionality './backup --help'
@@ -17,7 +20,7 @@ USAGE
 ./backup.sh -d nodry      - daily backup
 ./backup.sh -w nodry      - weekly backup
 
-CURRENT PATHES (edit backup.sh to change them):
+CURRENT PATHS (edit backup.sh to change them):
 
 EOF
     echo daily backup stored in":$backup_daily"
