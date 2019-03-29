@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PERSONAL BACKUP - USER HOME FILES (AS USER)
+# PERSONAL BACKUP - USER HOME FILES
 # MIT License
 # Copyright (c) 2019 jaggiJ
 
@@ -15,8 +15,8 @@ This example is for HOME backup '/home/'
 
 USAGE
 
-./backup.sh type dryrun time
-./backup.sh               - dryrun of daily home backup
+./backup.sh -d dry        - dryrun of daily backup
+./backup.sh -w dry        - dryrun of weekly backup
 ./backup.sh -d nodry      - daily backup
 ./backup.sh -w nodry      - weekly backup
 
@@ -39,25 +39,41 @@ bdestination="$backup_daily"
 # MAIN PROGRAM
 
 # check for help function
-[[ $1 == --help || $1 == -h ]] && help && exit 0
+[[ $1 == --help || $1 == -h || $# == 0 ]] && help && exit 0
 
 # determine daily or weekly backup type
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
 echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
     | tee -a lastbackup.log
 
+# check for backup source directory existence
+[ ! -d "$bsource" ] && echo directory for backup source not present && exit 10
+
+# CHECK IF DIRECTORY FOR DAILY OR WEEKLY BACKUPS EXIST
+if [[ $1 == -w || $1 == -d ]] ; then
+    if [ ! -d "$bdestination" ]; then
+        echo directory for backup not present && exit 10
+    else
+        echo Directory for the backup is OK
+    fi
+fi
+
+# RUN BACKUP SCRIPT
 if [[ $2 == nodry ]] ; then
     rsync -xaAXhv --delete-excluded \
           --log-file="log`date +%d%b%Y`time`date +%H%M`" \
           --include-from=./included \
           --exclude-from=./excluded \
           "$bsource" "$bdestination"
-else
+elif [[ $2 == dry ]] ; then
     rsync -xaAXhv --dry-run --delete-excluded \
           --log-file="log`date +%d%b%Y`time`date +%H%M`" \
           --include-from=./included \
           --exclude-from=./excluded \
           "$bsource" "$bdestination"
+else
+    help
+    exit 0
 fi
 
 # END OF MAIN PROGRAM

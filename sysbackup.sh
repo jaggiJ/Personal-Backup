@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# PERSONAL BACKUP - SYSTEM FILES (AS ROOT)
+# PERSONAL BACKUP - SYSTEM FILES
 # MIT License
 # Copyright (c) 2019 jaggiJ
 
-# USAGE: /.sysbackup.sh --help
+# USAGE examples: /.sysbackup.sh --help
 
-# user help functionality './sysbackup --help'
+# HELP FUNCTION 
 function help {
     cat <<EOF
 
@@ -15,7 +15,11 @@ This example is for system backup / (root)
 
 USAGE
 
-./sysbackup.sh               - dryrun of daily system backup (default)
+Remember to include sudo to backup system files by hand. When adding to crontab
+with 'sudo crontab -e' do NOT include sudo since then the job will run as root.
+
+./sysbackup.sh -d dry        - dryrun of daily system backup
+./sysbackup.sh -w dry        - dryrun of weekly system backup
 ./sysbackup.sh -d nodry      - daily backup
 ./sysbackup.sh -w nodry      - weekly backup
 ./sysbackup.sh -tar          - monthly incremental backup (nodry)
@@ -29,24 +33,37 @@ EOF
     echo directory to backup":$bsource"
 }
 
-# VARIABLES TO SETUP BY USER
+# DEFINE PATHS HERE
 
 # where to store daily /home backups ?
 backup_daily=/home/jaggij/sysbackup
+
 # where to store weekly /home backups ?
 backup_weekly=/media/backups/weekly/system
+
 # where to store monthly home and sys backup ?
 backup_monthly=/media/backups/weekly
+
 # what need to be backed up ?
 bsource=/
+
+# END DEFINE BACKUP PATHS HERE
 
 # MAIN PROGRAM
 
 # check for help function
-[[ $1 == --help || $1 == -h ]] && help && exit 0
+[[ $1 == --help || $1 == -h || $# == 0 ]] && help && exit 0
 
-# run monthly backup code
+# check for backup source directory existence
+[ ! -d "$bsource" ] && echo directory for backup source not present && exit 10
+
+# RUN MONTHLY BACKUP CODE
+
 if [[ $1 == "-tar" ]]; then
+
+    # check if directory exist
+    [ ! -d "$backup_monthly" ] && echo directory for backup \
+                                       not present && exit 10
 
     # go into monthly backup directory
     cd $backup_monthly || exit 3
@@ -66,13 +83,30 @@ if [[ $1 == "-tar" ]]; then
     exit 0
 fi
 
-# determine daily or weekly backup type
+# END OF RUN MONTHLY BACKUP CODE
+
+# ADDITIONAL CHECKS
+
+# DETERMINE DAILY OR WEEKLY BACKUP TYPE
 bdestination="$backup_daily"
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
 echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
     |tee -a lastbackupsys.log
 
-# main command that writes changes
+# CHECK IF DIRECTORY FOR DAILY OR WEEKLY BACKUPS EXIST
+if [[ $1 == -w || $1 == -d ]] ; then
+    if [ ! -d "$bdestination" ]; then
+        echo directory for backup not present && exit 10
+    else
+        echo Directory for the backup is OK
+    fi
+fi
+
+# END OF ADDITIONAL CHECKS
+
+# MAIN COMMAND THAT WRITES CHANGES
+
+# RUN WEEKLY AND DAILY BACKUP
 if [[ $2 == nodry ]] ; then
     rsync -xaAXhv --delete-excluded \
           --log-file="logsys_`date +%d%b%Y`time`date +%H%M`" \
@@ -80,14 +114,23 @@ if [[ $2 == nodry ]] ; then
           --exclude-from=./excludedsys \
           "$bsource" "$bdestination"
 
-# main command simulation only (dryrun)
-else
+# END OF MAIN COMMAND THAT WRITES CHANGES
+
+# MAIN COMMAND SIMULATION ONLY (DRYRUN)
+
+elif [[ $2 == dry ]]; then
     rsync -xaAXhv --dry-run --delete-excluded \
           --log-file="logsys_`date +%d%b%Y`time`date +%H%M`" \
           --include-from=./includedsys \
           --exclude-from=./excludedsys \
           "$bsource" "$bdestination"
+else
+    # runs help function printing usage examples
+    help
+    exit 0
 fi
+
+# END OF MAIN COMMAND SIMULATION ONLY (DRYRUN)
 
 # END OF MAIN PROGRAM
 
