@@ -55,9 +55,9 @@ backups=/home/jaggij/Git/Personal-Backup
 30 13 1 * * cd "$backups" && ./sysbackup.sh -tar
 ```
 
-## WORK IN PROGRESS:  
+## WORK IN PROGRESS TOWARD 1.0 FINAL:  
 
-restore.sh is not functional yet  
-plan for backup when HOME and / ROOT are on same partition
+**Development**: [https://github.com/jaggiJ/Personal-Backup/projects/1](https://github.com/jaggiJ/Personal-Backup/projects/1)
+
 
 ## THE END
