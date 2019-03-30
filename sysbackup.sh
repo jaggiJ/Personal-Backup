@@ -20,9 +20,11 @@ with 'sudo crontab -e' do NOT include sudo since then the job will run as root.
 
 ./sysbackup.sh -d dry        - dryrun of daily system backup
 ./sysbackup.sh -w dry        - dryrun of weekly system backup
+./sysbackup.sh -tar dry      - dryrun of monthly system backup
+
 ./sysbackup.sh -d nodry      - daily backup
 ./sysbackup.sh -w nodry      - weekly backup
-./sysbackup.sh -tar          - monthly incremental backup (nodry)
+./sysbackup.sh -tar nodry    - monthly incremental backup
 
 CURRENT PATHS (edit sysbackup.sh to change them):
 
@@ -49,30 +51,39 @@ bsource=/
 
 # END DEFINE BACKUP PATHS HERE
 
+# DEFINE FUNCTIONS
+
+# SWITCH DIRECTORY FOR TAR
+mv_dir() {
+
+    # check if directory exist
+    [ ! -d "$backup_monthly" ] && echo directory for backup \
+                                        "$backup_monthly" not present && exit 10
+
+    # go into monthly backup directory
+    cd $backup_monthly || exit 3
+}
+
+# END OF DEFINE FUNCTIONS
+
 # MAIN PROGRAM
 
 # check for help function
 [[ $1 == --help || $1 == -h || $# == 0 ]] && help && exit 0
 
-# check for backup source directory existence
-[ ! -d "$bsource" ] && echo directory for backup source not present && exit 10
-
 # RUN MONTHLY BACKUP CODE
 
-if [[ $1 == "-tar" ]]; then
+if [[ $1 == "-tar" && $2 == nodry ]]; then
 
-    # check if directory exist
-    [ ! -d "$backup_monthly" ] && echo directory for backup \
-                                       not present && exit 10
-
-    # go into monthly backup directory
-    cd $backup_monthly || exit 3
+    # switch directory to backup source for tar
+    mv_dir
 
     # run full backup 0-level if not already present
     if [ ! -f backup0*.tar.gz ]; then
         tar --listed-incremental=snapshot.file \
             -cpzvf "backup0_`date +%d-%b-%Y`.tar.gz" home/ system/ \
-            && echo Monthly backup started and stored at "$backup_monthly"
+            && echo Monthly backup started and stored at "$backup_monthly" \
+                    2>&1 | tee log"$(date +%d%H%M)"
 
     else  # run 1-level incremental backup
         cp snapshot.file snapshot.file1 && echo snapshot file copied
@@ -80,7 +91,21 @@ if [[ $1 == "-tar" ]]; then
             backup1_"`date +%d-%b-%Y`time`date +%H%M`".tar.gz home/ system/ \
             2>&1 | tee log"$(date +%d%H%M)"
     fi
-    exit 0
+exit 0
+elif [[ $1 == "-tar" && $2 == dry ]]; then
+
+    # switch directory to backup source for tar
+    mv_dir
+
+    # run full backup 0-level if not already present
+    if [ ! -f backup0*.tar.gz ]; then
+        tar --listed-incremental=snapshot.file -cpzvf - home/ system/ | wc -c
+
+    else  # run 1-level incremental backup
+        echo cp snapshot.file snapshot.file1 && echo snapshot file copied
+        tar --listed-incremental=snapshot.file1 -cpzvf - home/ system/ | wc -c
+    fi
+exit 0
 fi
 
 # END OF RUN MONTHLY BACKUP CODE
@@ -92,15 +117,6 @@ bdestination="$backup_daily"
 [[ $1 == "-w" ]] && bdestination="$backup_weekly"
 echo backup_path is "$bdestination `date +%d%b%Y`time`date +%H%M`" \
     |tee -a lastbackupsys.log
-
-# CHECK IF DIRECTORY FOR DAILY OR WEEKLY BACKUPS EXIST
-if [[ $1 == -w || $1 == -d ]] ; then
-    if [ ! -d "$bdestination" ]; then
-        echo directory for backup not present && exit 10
-    else
-        echo Directory for the backup is OK
-    fi
-fi
 
 # END OF ADDITIONAL CHECKS
 

@@ -19,9 +19,9 @@ USAGE EXAMPLES
 TO RESTORE SINGLE DIRECTORY FROM BACKUP (source) TO CURRENT HOME OR SYSTEM
 
 ./restore.sh /home/jaggij/Backup/Video /home/jaggij/Video
-             source                    destination          
+             source                    destination
 sudo ./restore.sh /media/backups/system/var /var
-                  source                    destination          
+                  source                    destination
 
 EOF
 }
