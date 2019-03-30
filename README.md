@@ -1,14 +1,28 @@
 # Personal-Backup
 
+## DISCLAIMER  
+
 DON'T USE THE CODE. RISK OF LOSING DATA IS MORE THAN VERY HIGH.  
 IT SERVES AS AN EXAMPLE FOR PERSONALISED AUTOMATED BACKUP SYSTEM.  
 IT COMES WITH ABSOLUTELY NO WARRANTY AND IS INTENDED TO VIEW NOT RUN.  
+
+IF YOUR HOME DIRECTORY IS ON SAME PARTITION AS YOUR ROOT / DIRECTORY  
+THEN THIS SETUP IS NOT SUITABLE FOR YOU, YET...
 
 This example is for system with home directory on separate partition  
 than system (root /) directory. Scripts are assumed to be located at  
 `/home/jaggij/Git/Personal-Backup/`  
 
-HOW TO USE CRONTAB TO AUTOMATE BACKUPS ?  
+## PERSONALISATION  
+
+To setup own backup paths for source and destination one need to edit  
+backup.sh and sysbackup.sh and  
+alter variables in section '# DEFINE PATHS HERE' and '# VARIABLES SET BY USER'  
+
+then one need to edit 'exclude' and 'sysexclude' to set directories or patterns  
+for data that won't be backed up. 
+
+## AUTOMATION  
 
 Order cron to backup system files and home (personal) files every day, every week,  
 and every month (3 separate backup destinations).  
@@ -41,6 +55,9 @@ backups=/home/jaggij/Git/Personal-Backup
 30 13 1 * * cd "$backups" && ./sysbackup.sh -tar
 ```
 
-WORK IN PROGRESS: restore.sh is not finished  
+## WORK IN PROGRESS TOWARD 1.0 FINAL:  
 
-THE END
+**Development**: [https://github.com/jaggiJ/Personal-Backup/projects/1](https://github.com/jaggiJ/Personal-Backup/projects/1)
+
+
+## THE END
