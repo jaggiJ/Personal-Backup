@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# TODO:
-# 1. commands for single directory restore, dryrun and normal
-# 2. commands for full restore of system and home backups dry and normal.
-
 # PERSONAL BACKUP - RESTORE OPTIONS
 # MIT License
 # Copyright (c) 2019 jaggiJ
@@ -14,26 +10,55 @@
 function help {
    cat <<EOF
 
-USAGE EXAMPLES
+USAGE INSTRUCTIONS (only work with rsync backup NOT tar, yet)
 
-TO RESTORE SINGLE DIRECTORY FROM BACKUP (source) TO CURRENT HOME OR SYSTEM
+Use  with sudo when restoring system files.
+First argument must be 'dry' OR 'nodry',
+second argument must be PATH TO SOURCE,
+third argument must be PATH TO DESTINATION.
+IF YOU SWAP SOURCE AND DESTINATION YOU CAN LOSE DATA !
 
-./restore.sh /home/jaggij/Backup/Video /home/jaggij/Video
-             source                    destination
-sudo ./restore.sh /media/backups/system/var /var
-                  source                    destination
+syntax: (source and destination must end with backslash '/' to mirror backup
+         content to destination. Differences will be deleted.)
+
+  [sudo] ./restore.sh [no]dry source/directory/ destination/directory/
+
+examples:
+
+./restore.sh    dry     /home/jaggij/Backup/Video/       /home/jaggij/Video
+   script      mode              source                    destination
+
+sudo    ./restore.sh    nodry     /media/backups/system/var/    /var
+root     script         mode             source              destination
 
 EOF
 }
 
-[[ $1 == "--help" || $1 == "-h" || $# == 0 ]] && help && exit 0
+echo $0
+# Triggers help if NOT: first argument is dry|nodry, and 3 arguments total
+if [[ ! $# == 3 || ! $1 == *"dry" ]] ; then
+    help
+    exit 0
+fi
 
-# This is example of `home backup restore`. Note --delete here is
-# without -excluded to prevent ... disaster :D
-# rsync -xaAXhv --dry-run --delete \
-      # --log-file="log`date +%d%b%Y`time`date +%H%M`" --exclude="lost+found" \
-      # --include-from=included --exclude-from=excluded \
-      # ~/Backup/ /home
+if [[ $1 == dry ]] ; then
+
+    rsync -xaAXhv --dry-run --delete \
+          --log-file="log_DRYRESTORE_`date +%d%b%Y`time`date +%H%M`" \
+          --include-from=included --exclude-from=excluded \
+          "$2" "$3"
+
+elif [[ $1 == nodry ]] ; then
+
+    # Note --delete NOT --delete-excluded is used to prevent massive data loss
+    rsync -xaAXhv --delete \
+          --log-file="log_RESTORE_`date +%d%b%Y`time`date +%H%M`" \
+          --include-from=included --exclude-from=excluded \
+          "$2" "$3"
+else
+    # first argument typo notification
+    echo 'Use "dry" or "nodry" as first argument'
+fi
 
 # ADDITIONAL NOTES
 

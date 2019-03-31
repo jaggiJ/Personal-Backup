@@ -35,7 +35,7 @@ EOF
     echo directory to backup":$bsource"
 }
 
-# DEFINE PATHS HERE
+# DEFINE BACKUP PATHS HERE
 
 # where to store daily /home backups ?
 backup_daily=/home/jaggij/sysbackup

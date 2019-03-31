@@ -29,7 +29,7 @@ EOF
     echo directory to backup":$bsource"
 }
 
-# VARIABLES TO SETUP BY USER
+# DEFINE BACKUP PATHS HERE
 
 backup_daily=/home/jaggij/Backup  # default backup path
 backup_weekly=/media/backups/weekly/home
