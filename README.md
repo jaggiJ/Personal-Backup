@@ -10,14 +10,13 @@ IF YOUR HOME DIRECTORY IS ON SAME PARTITION AS YOUR ROOT / DIRECTORY
 THEN THIS SETUP IS NOT SUITABLE FOR YOU, YET...
 
 This example is for system with home directory on separate partition  
-than system (root /) directory. Scripts are assumed to be located at  
-`/home/jaggij/Git/Personal-Backup/`  
+than system (root /) directory.  
 
 ## PERSONALISATION  
 
 To setup own backup paths for source and destination one need to edit  
 backup.sh and sysbackup.sh and  
-alter variables in section '# DEFINE PATHS HERE' and '# VARIABLES SET BY USER'  
+alter variables in section '# DEFINE BACKUP PATHS HERE'  
 
 then one need to edit 'exclude' and 'sysexclude' to set directories or patterns  
 for data that won't be backed up. 
